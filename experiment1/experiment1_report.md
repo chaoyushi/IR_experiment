@@ -1,6 +1,6 @@
-#Experiment-1
+# Experiment-1
 
-#Inverted index and BooleanRetrieval Model
+# Inverted index and BooleanRetrieval Model
 <br>
 
 ### 一、实验要求
@@ -11,7 +11,7 @@
 
 我们首先观察该数据集，如下：
 
-![image1](1.png)
+![image1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/1.PNG)
 
 &emsp;我们可以看到，tweets数据集中包含了许多信息，包括username，clusterNo，text，timestr,tweetid，errorcode，textcleaned，relevance。其中，我们需要提取的信息是text部分。
 
