@@ -7,7 +7,6 @@ from textblob import TextBlob
 from textblob import Word
 from collections import defaultdict
 
-uselessTerm = ["username", "text", "tweetid"]
 #index  最先出现的位置
 #rindex  str.rindex(str, beg=0 end=len(string))返回子字符串 str
 # 在字符串中最后出现的位置，如果没有匹配的字符串会报异常，
@@ -258,7 +257,7 @@ def tips():
     print("Tips:\n"
           "Model 1: you can input only one term;\n"
           "Model 2: your input can include 'and','or' and 'not',each operator is a binary operator;\n"
-          "Model 3: your input can include '()'to represent the operator's priority.\n"
+          #"Model 3: your input can include '()'to represent the operator's priority.\n"
           )
 
 def main():
