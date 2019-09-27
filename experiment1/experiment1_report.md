@@ -243,23 +243,23 @@ elif '(' not in split_list and ')' not in split_list:
 
 #### 1.单词项测试
 
-![image2](test1.png)
+![image2](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test1.PNG)
 
 #### 2.两个词项执行and操作
 
-![image3](test2.png)
+![image3](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test2.PNG)
 
 #### 3.两个词项执行or操作
 
-![image4](test3.png)
+![image4](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test3.PNG)
 
 #### 4.两个词项执行not操作(and not)
 
-![image5](test4.png)
+![image5](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test4.PNG)
 
 #### 5.多个词项执行and，or，not操作
 
-![image6](test5.png)
+![image6](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test5.PNG)
 
 ### 四、实验改进与不足
 
