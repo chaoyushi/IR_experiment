@@ -186,7 +186,7 @@ def calculate(split_string):
     global postings
     ans = []
     split_list = split_input2(split_string)
-    print(split_list)
+    #print(split_list)
     if '(' in split_list and ')' in split_list:
         return ans
     elif '(' not in split_list and ')' not in split_list:
@@ -222,9 +222,9 @@ def calculate(split_string):
                         ans = sorted(list(set(ans)))
                     elif split_list[i + 1] == "not":
                         temp=[]
-                        for i in all:
-                            if i not in postings[split_list[i + 2]]:
-                                temp.append(i)
+                        for ele in all:
+                            if ele not in postings[split_list[i + 2]]:
+                                temp.append(ele)
                         ans = sorted(list(set(ans) & set(temp)))
                 #i+=2
 
