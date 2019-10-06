@@ -39,6 +39,7 @@ normalization
 #### 1.创建新的倒排索引记录表(二元组)
 
 &emsp;(1)首先，计算每个doc中每个term出现的频率，并计算如下：
+$tf_{t,d}=1+log(tf_{t,d}\)$
 ![](http://latex.codecogs.com/gif.latex?\\\tf_{t,d}=1+log(tf_{t,d}\))
 然后，对得到的数值进行归一化(normalization)。
 
