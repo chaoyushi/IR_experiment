@@ -1,8 +1,10 @@
 import re
 import nltk
-import numpy
+import numpy as np
 import string
 import sys
+import pickle
+import math
 from textblob import TextBlob
 from textblob import Word
 from collections import defaultdict
@@ -14,7 +16,12 @@ from collections import defaultdict
 
 
 postings = defaultdict(dict)
+postings_for_topk = defaultdict(dict)
 all=[]
+global_dict=[]
+topK=10    #前K个
+document={}
+
 
 def preprocess(document):
     global postings
@@ -37,22 +44,48 @@ def preprocess(document):
 def get_postings():
     global postings
     global all
+    global postings
     f = open("tweets1.txt", 'r')
     lines=f.readlines()
-    #merger or surprisingly
     i=1
     for line in lines:
         all.append(i)
         line=preprocess(line)
+        #print(line)
+        #计算TF
         unique_terms=set(line)
+        t1=0
         for every_term in unique_terms:
+            #统计TF
+            term_frequency =1+math.log10(line.count(every_term))
+            t1+=term_frequency*term_frequency
+            #print(term_frequency)
             if every_term in postings.keys():
                 postings[every_term].append(i)
             else:
                 postings[every_term]=[i]
+
+        ans1=math.sqrt(t1)
+        for every_term in unique_terms:
+            term_frequency = 1 + math.log10(line.count(every_term))
+            #重新计算一次，保存到二元组中的数值为归一化之后的数值
+            if every_term in postings_for_topk.keys():
+                postings_for_topk[every_term].append((i, term_frequency/ans1))
+            else:
+                postings_for_topk[every_term] = [(i, term_frequency/ans1)]
+
+        #计算文档频率
+        for every_term in unique_terms:
+            if every_term in document.keys():
+                document[every_term]+=1
+            else:
+                document[every_term]=1
         i=i+1
 
     number=i-1
+    #计算idf
+    for every_key in document.keys():
+        document[every_key]=math.log10(float(number)/document[every_key])
     # print(all)
     print("预处理完成")
     print("文本数量共计：",number,"项")
@@ -133,7 +166,7 @@ def twice_not(term1,term2):
             elif ans1[i]<ans2[j]:
                 i=i+1
             else:
-                j=j+1
+                j = j + 1
     return ans
 
 def split_input1(input_string):
@@ -233,9 +266,43 @@ def calculate(split_string):
         print("input error ")
         return ans
 
-def search():
+
+
+def lncltc(terms):
+    # 计算tf
+    query_dict = {}
+    unique_terms = set(terms)
+    score = {}
+
+    # 计算涉及到的doc的分数
+    for every_term in unique_terms:
+        query_dict[every_term] = 1 + math.log10(terms.count(every_term))
+        for every_tuple in postings_for_topk[every_term]:
+            # 对应的tf
+            if every_tuple[0] in score.keys():
+                score[every_tuple[0]]\
+                    += query_dict[every_term] * document[every_term] * every_tuple[1]
+            else:
+                score.update({every_tuple[0]:
+                                  query_dict[every_term] * document[every_term] * every_tuple[1]})
+    # 根据分数对score字典进行排序
+    ans = sorted(score.items(), key=lambda item: item[1], reverse=True)
+    #print(ans)
+    answer = []
+    if len(ans) <= topK:
+        for every_doc in ans:
+            answer.append(every_doc[0])
+    else:
+        temp = ans[:topK]
+        for every_doc in temp:
+            answer.append(every_doc[0])
+    return answer
+
+def search1():
     global postings
     input_str=input("Please input your query:")
+    if input_str=="Exit":
+        exit(0)
     terms=split_input1(input_str)
     #print(postings["surprisingly"])
     if terms==[]:
@@ -251,21 +318,46 @@ def search():
     elif len(terms)>3:
         print(calculate(input_str))
 
-    #elif len(terms)==5:
+def search2():
+    global postings
+    global postings_for_topk
+    input_str = input("Please input your query:")
+    if input_str=="Exit":
+        exit(0)
+    terms = split_input1(input_str)
+    answer=lncltc(terms)
+    lines=open("tweet_text.txt",'r+').readlines()
+    for docid in answer:
+        print(lines[docid-1])
 
-def tips():
+
+
+def choose_model():
     print("Tips:\n"
-          "Model 1: you can input only one term;\n"
-          "Model 2: your input can include 'and','or' and 'not',each operator is a binary operator;\n"
-          #"Model 3: your input can include '()'to represent the operator's priority.\n"
-          )
+          "You can choose the following two models:\n"
+          "Model 1(Boolean Retrieval Model):\n"
+          "   (1)you can input only one term;\n"
+          "   (2)your input can include 'and','or' and 'not',each operator is a binary operator;\n"
+          "Model 2:(Ranked retrieval model)\n"
+          "   (1)You can enter the query text freely just like web search\n"
+          "You can choose the mode by entering Arabic numerals like '1' or '2'\n"
+          "You can input 'Exit' to exit the program")
+    opt=int(input("input your option here:"))
+    if opt==1:
+        while True:
+            search1()
+    elif opt==2:
+        while True:
+            search2()
+    else:
+        print("No such option")
 
 def main():
     global postings
+    global postings_for_topk
     get_postings()
-    tips()
-    while True:
-        search()
+    choose_model()
+
 
 if __name__ == '__main__':
     main()

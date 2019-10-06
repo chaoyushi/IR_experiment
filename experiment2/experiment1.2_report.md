@@ -1,270 +1,242 @@
-# Experiment-1
+# Experiment-1.2
 
-# Inverted index and BooleanRetrieval Model
+# Ranked retrieval model
 <br>
 
 ### 一、实验要求
 
-#### 1.构建invertedindex:
 
-构建倒排索引是基于tweets数据集的。
+#### 1.输入输出要求：
 
-我们首先观察该数据集，如下：
+##### 在Homework1.1的基础上实现最基本的Ranked retrieval model
 
-![image1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/1.PNG)
+• **Input**： a query (like Ron Weasley birthday)
 
-&emsp;我们可以看到，tweets数据集中包含了许多信息，包括username，clusterNo，text，timestr,tweetid，errorcode，textcleaned，relevance。其中，我们需要提取的信息是text部分。
-
-<br>
-&emsp; –1. 实现Boolean Retrieval Model，使用TREC 2014 test
-topics进行测试；
-
-&emsp; –2. Boolean Retrieval Model：
-<br>
-
-#### 2.输入输出要求：
-
-• **Input**： a query (like Ron and Weasley)
-
-• **Output**: print the qualified tweets.
+• **Output**: Return the top K (e.g.,K = 10) relevant tweets.
 
 • **Query**：支持and, or ,not；查询优化可以选做；
 
-#### 3.注意：
+#### 2.Use SMART notation: lnc.ltc
 
-•**预处理**：对于tweets与queries使用相同的预处理；
+• **Document**: logarithmic tf (l as first character), no idf and cosine
+normalization
+
+• **Query**: logarithmic tf (l in leftmost column), idf (t in second column), no
+normalization
+
+#### 3.改进Inverted index
+
+• 在Dictionary中存储每个term的DF
+
+• 在posting list中存储term在每个doc中的TF with pairs (docID, tf)
+
+#### 4.选做
+
+• 支持所有的SMART Notations。
 
 ### 二、实验步骤
 
-#### 1.文本预处理
+#### 1.创建新的倒排索引记录表(二元组)
 
-首先，我们定义一个函数，对每一行文本进行处理：对该行文本进行处理。
-
-1.首先，将文本的每一个字符转换为小写，然后使用index函数，查找字符串中“text”字符和“timestr”字符的位置，从而定位出text文本在字符串中的位置。保存到新的字符串中。
-
-2.其次，我们使用文本处理工具TextBlob对文本进行处理：
-&emsp;(1) 使用singularize函数对词汇进行单数化（复数转化为单数）
-
-&emsp;(2) 遍历每一个词汇，将动词转化为动词原形。
-
-&emsp;(3) 返回词汇列表。
-
-#### 2.创建倒排索引记录表
-
-&emsp;(1) 首先，逐行读取tweet文件，遍历每一行，并将每一行的每一个词汇存入一个集合中，即实现集合中词汇的去重；遍历集合中的每一个term，如果该term在全局字典中存在对应的keys，则对以该terms为keys的元组存在时，那么append该term存在的行号，(此处以行号作为每一个term的标识)，如果不存在，则创建对应的元组。
-
-&emsp;(2)记录文本对应的行数。并输出提示信息。
+&emsp;(1)首先，计算每个doc中每个term出现的频率，并计算如下：
+![](http://latex.codecogs.com/gif.latex?\\\tf_{t,d}=1+log(tf_{t,d}\))
+然后，对得到的数值进行归一化(normalization)。
 
 
-**注意**：postings词典 是在全局声明的。
+&emsp;(2)计算df和idf，即文档频率以及逆文档频率。其中idf=log(N/df)
 
-#### 3.创建基本的查询函数
+&emsp;(3)将原来的postings以及现在的postings_for_topk，以及document(存放逆文档频率的字典)保存成文件，使用numpy中的save函数保存为npy文件。
 
-&emsp;(1) 对两个词项的and操作：
-
-&emsp;1)传入参数有两个，即要执行and操作的两个term。创建一个空的列表ans。
-
-&emsp;2)如果两个term都不在字典中，那么直接放回ans。
-
-&emsp;3)否则，获取以term1和term2为键值的列表，分别设定两个迭代器对列表进行遍历，如下：
+修正后的get_postings代码如下：
 ```python
-
-        len1=len(postings[term1])
-        len2=len(postings[term2])
-        p1=0
-        p2=0
-        while p1<len1 and p2<len2:
-            if postings[term1][p1] == postings[term2][p2]:
-                ans.append(postings[term1][p1])
-                p1+= 1
-                p2+= 1
-            elif postings[term1][p1] < postings[term2][p2]:
-                p1 += 1
-            else:
-                p2+= 1
-
-
-```
-最终返回记录得到的ans列表。
-
-&emsp;(2) 对两个词项的or操作：
-```python
- ans=[]
-    if term1 not in postings and term2 not in postings:
-        ans=[]#都不在为空
-    elif term1 in postings and term2 not in postings:
-        ans=postings[term1]
-    elif term2 in postings and term1 not in postings:
-        ans=postings[term2]
-    else:
-        ans=postings[term1]
-        for item in postings[term2]:
-            if item not in ans:
-                ans.append(item)
-```
-
-&emsp;(3) 对两个词项的not操作：
-
-&emsp;1)首先，创建一个全局列表，该列表是一个和文本数目相同的从1开始的列表。
-
-&emsp;2)然后，设计单独的函数，实现对单个词项的not操作，返回一个列表。如下：
-
-```python
-    ans=[]
-    if term not in postings:
-        return ans
-    # print("not")
-    # print(all)
-    # print("not")
-    for item in all:
-        if item not in postings[term]:
-            ans.append(item)
-    return ans
-```
-
-&emsp;3)在单个此项取not的基础上，设计对两个词项之间not操作的函数。因为我们的not事实上指的是 and not 的缩写，所以，此时，对应的处理和and操作类似，即相当于两个列表的合并。代码如下所示：
-
-```python
-    if term1 not in postings or term2 not in postings:
-        return ans
-    else:
-        ans1=postings[term1]
-        ans2=signal_not(term2)
-        len1=len(ans1)
-        len2=len(ans2)
-        i=0
-        j=0
-        while i<len1 and j < len2:
-            if ans1[i] == ans2[j]:
-                ans.append(ans1[i])
-                i=i+1
-                j=j+1
-            elif ans1[i]<ans2[j]:
-                i=i+1
-            else:
-                j=j+1
-    return ans
-```
-
-#### 4.输入文本处理及main函数书写
-
-&emsp;1) 对于输入文本，对term的处理方式同对文本的处理方式。
-
-&emsp;2) 对于词项的数目小于等于3时，做如下处理：
-
-```python
-if terms==[]:
-        print("your input is empty")
-    if len(terms)==1:
-
-        print(postings[terms[0]])
-    elif len(terms)==2:
-        print("sorry ,your input format is wrong!")
-    #简单查询
-    elif len(terms)==3:
-        search_three_tuple(terms)
-
-#词项数目等于3
-def search_three_tuple(terms):
+def get_postings():
     global postings
-
-    if len(terms)==3:
-        answer = []
-        # A and B
-        if terms[1] == "and":
-            answer = merge_and2(terms[0], terms[2])
-            print(answer)
-        # A or B
-        elif terms[1] == "or":
-            answer = merge_or2(terms[0], terms[2])
-            print(answer)
-        # A and (not) B   为方便处理，此处省略  and
-        elif terms[1] == "not":
-            answer = twice_not(terms[0], terms[2])
-            print(answer)
-        # 输入的三个词格式不对
-        else:
-            print("sorry ,your input format is wrong!")
-
-```
-
-#### 5.改进
-
-如果输入的文本包含了括号或者输入的查询大于3，那么仅仅通过以上函数就无法实现了，因此，我对输入的查询大于3的情况作了如下改进。
-
-&emsp;1) 此时，对输入文本的处理略有不同，应该保留括号等元素(之前的处理直接将特殊符号去除了)此处使用nltk中的分词工具进行处理，其他地方基本一致。
-
-&emsp;2) 如果查询中不包含括号，那么对应的操作就应该是基于两个term操作的基础之上的，对两个term进行and or not操作得到一个列表，对得到的列表和第三个至多个元素进行操作，即为列表的交并补集操作。如下：
-```python
-elif '(' not in split_list and ')' not in split_list:
-        for i in range(len(split_list)):
-            #print(ans)
-
-            if i%2!=0:
-                continue
-            #print(i)
-            if i == 0:
-                if split_list[i + 1] == 'and':
-                    ans = merge_and2(split_list[i], split_list[i + 2])
-                elif split_list[i + 1] == "or":
-                    ans = merge_or2(split_list[i], split_list[i + 2])
-                elif split_list[i + 1] == "not":
-                    ans = twice_not(split_list[i], split_list[i + 2])
-                #i+=2
-            elif i>=len(split_list)-1:
-                break
+    global all
+    global postings
+    f = open("tweets1.txt", 'r')
+    lines=f.readlines()
+    i=1
+    for line in lines:
+        all.append(i)
+        line=preprocess(line)
+        #print(line)
+        #计算TF
+        unique_terms=set(line)
+        t1=0
+        for every_term in unique_terms:
+            #统计TF
+            term_frequency =1+math.log10(line.count(every_term))
+            t1+=term_frequency*term_frequency
+            #print(term_frequency)
+            if every_term in postings.keys():
+                postings[every_term].append(i)
             else:
-                if split_list[i + 2] not in postings:
-                    ans=ans
-                else:
-                    if split_list[i + 1] == 'and':
-                        #and 对应列表的交集
-                        #print(postings[split_list[i + 2]])
+                postings[every_term]=[i]
 
-                        #print(set(postings[split_list[i + 2]])&set(ans))
-                        ans = sorted(list(set(ans) & set(postings[split_list[i + 2]])))
-                    elif split_list[i + 1] == "or":
-                        #or对应列表相加
-                        ans = ans + postings[split_list[i + 2]]
-                        ans = sorted(list(set(ans)))
-                    elif split_list[i + 1] == "not":
-                        temp=[]
-                        for i in all:
-                            if i not in postings[split_list[i + 2]]:
-                                temp.append(i)
-                        ans = sorted(list(set(ans) & set(temp)))
-                #i+=2
+        ans1=math.sqrt(t1)
+        for every_term in unique_terms:
+            term_frequency = 1 + math.log10(line.count(every_term))
+            #重新计算一次，保存到二元组中的数值为归一化之后的数值
+            if every_term in postings_for_topk.keys():
+                postings_for_topk[every_term].append((i, term_frequency/ans1))
+            else:
+                postings_for_topk[every_term] = [(i, term_frequency/ans1)]
 
-        return ans
+        #计算文档频率
+        for every_term in unique_terms:
+            if every_term in document.keys():
+                document[every_term]+=1
+            else:
+                document[every_term]=1
+        i=i+1
+
+    number=i-1
+    #计算idf
+    for every_key in document.keys():
+        document[every_key]=math.log10(float(number)/document[every_key])
+
+    np.save("idf.npy",document)
+    np.save("postings.npy",postings)
+    np.save("postings_for_topk.npy",postings_for_topk)
+    # print(all)
+    print("预处理完成")
+    print("文本数量共计：",number,"项")
+    print("倒排索引记录表建立完成")
 ```
-&emsp;3) 如果输入查询中包含了括号，暂时不做处理。（还未实现）
+
+**注意**：postings，postings_for_topk,document都是词典 是在全局声明的。
+
+#### 2.Use SMART notation: lnc.ltc
+
+
+**参考计算方式如下图：**
+
+![image1](smartnotation.PNG)
+
+![image2](lncltc.PNG)
+
+&emsp;(1) 将query分成多个term，在postings_for_topk中可以返回一串二元组，每个二元组包含了docID以及tf，根据公式计算并累加求和得到针对相关句子的score。
+
+&emsp;(2) 根据score对涉及到的句子分数从高到低进行排序，选择topk个相关的句子，如果涉及到的句子不足topk个，那么直接把所有的句子由相似度从高到低输出。
+
+相关代码如下
+```python
+def lncltc(terms):
+    # 计算tf
+    query_dict = {}
+    unique_terms = set(terms)
+    score = {}
+
+    # 计算涉及到的doc的分数
+    for every_term in unique_terms:
+        query_dict[every_term] = 1 + math.log10(terms.count(every_term))
+        for every_tuple in postings_for_topk[every_term]:
+            # 对应的tf
+            if every_tuple[0] in score.keys():
+                score[every_tuple[0]]\
+                    += query_dict[every_term] * document[every_term] * every_tuple[1]
+            else:
+                score.update({every_tuple[0]:
+                                  query_dict[every_term] * document[every_term] * every_tuple[1]})
+    # 根据分数对score字典进行排序
+    ans = sorted(score.items(), key=lambda item: item[1], reverse=True)
+    #print(ans)
+    answer = []
+    if len(ans) <= topK:
+        for every_doc in ans:
+            answer.append(every_doc[0])
+    else:
+        temp = ans[:topK]
+        for every_doc in temp:
+            answer.append(every_doc[0])
+    return answer
+
+
+```
+#### 3.已保存变量载入
+
+载入保存的文件，而不是像第一个实验中动态建立，可以加快运行速度。
+
+```python
+def load_npy():
+    print("文件载入中……")
+    document=np.load("idf.npy").item()
+    postings=np.load("postings.npy").item()
+    postings_for_topk=np.load("postings_for_topk.npy").item()
+    tweet_text = open("tweet_text.txt", 'r+').readlines()
+    print("文件载入完成")
+    return document,postings,postings_for_topk,tweet_text
+```
+
+#### 4.设计简单交互和运行提示
+
+
+```python
+def search2():
+    global postings
+    global postings_for_topk
+    global tweet_text
+    input_str = input("Please input your query:")
+    if input_str=="Exit":
+        exit(0)
+    if input_str == "Back":
+        return False
+    terms = split_input1(input_str)
+    answer=lncltc(terms)
+
+    for docid in answer:
+        print(tweet_text[docid-1])
+
+    return True
+
+
+
+def choose_model():
+    print("Tips:\n"
+          "You can choose the following two models:\n"
+          "Model 1(Boolean Retrieval Model):\n"
+          "   (1)you can input only one term;\n"
+          "   (2)your input can include 'and','or' and 'not',each operator is a binary operator;\n"
+          "Model 2:(Ranked retrieval model)\n"
+          "   (1)You can enter the query text freely just like web search\n"
+          "You can choose the mode by entering Arabic numerals like '1' or '2'\n"
+          "You can input 'Exit' to exit the program\n"
+          "You can input 'Back' to go back to choose option\n")
+    while True:
+        opt=int(input("input your option here:"))
+        if opt==1:
+            while search1():
+                pass
+        elif opt==2:
+            while search2():
+                pass
+        else:
+            print("No such option")
+
+```
+
 
 ### 三、实验结果
 
-#### 1.单词项测试
+#### 1.界面与返回功能
 
-![image2](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test1.PNG)
+![image3](run1.PNG)
 
-#### 2.两个词项执行and操作
+#### 2.Ranked retrieval model
 
-![image3](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test2.PNG)
+此处取topk=10
 
-#### 3.两个词项执行or操作
+**Test1：**
 
-![image4](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test3.PNG)
 
-#### 4.两个词项执行not操作(and not)
+![image4](run2.PNG)
 
-![image5](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test4.PNG)
+**Test2**
 
-#### 5.多个词项执行and，or，not操作
-
-![image6](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test5.PNG)
+![image5](run3.PNG)
 
 ### 四、实验改进与不足
 
-##### (1) 实验中没有将倒排索引记录表存储在文件中，每次动态建立倒排索引记录表；
+##### (1) 实验中将倒排索引记录表存储在文件中，方便了每次直接从文件中读取变量。
 
-##### (2) 实验中已经实现对于多个词项的布尔查询，但是还未实现对于含括号时的文本处理与检索分析；
-
-##### (3)对于tweet数据集只保留了text信息，同时，对每一行文本使用集合set处理，丢失了词频的信息。
+##### (2)对于tweet数据集只保留了text信息，同时，对每一行文本使用集合set处理，同时保留了词频的信息。
