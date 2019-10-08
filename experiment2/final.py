@@ -272,7 +272,7 @@ def calculate(split_string):
 
 
 
-def lncltc(terms):
+def lncltn(terms):
     # 计算tf
     query_dict = {}
     unique_terms = set(terms)
@@ -335,7 +335,7 @@ def search2():
     if input_str == "Back":
         return False
     terms = split_input1(input_str)
-    answer=lncltc(terms)
+    answer=lncltn(terms)
 
     for docid in answer:
         print(tweet_text[docid-1])
