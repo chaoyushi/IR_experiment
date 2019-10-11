@@ -28,11 +28,11 @@
 • **(1) MAP**:
 
 
-![MAP1](MAP1.png)
+![MAP1](MAP1.PNG)
 
 **MAP example**
 
-![MAP1example](MAPexample.png)
+![MAP1example](MAPexample.PNG)
 
 • **(2) MRR**:
 
