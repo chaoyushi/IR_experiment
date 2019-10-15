@@ -62,10 +62,12 @@ def MAP_eval(qrels_dict, test_dict, k = 100):
         else:
             #print('query:', query, ' not found a true value')
             AP_result.append(0)
+    #print(len(AP_result)) 55
     return np.mean(AP_result)
 
 def MRR_eval(qrels_dict,test_dict,k=100):
     RR_result=[]
+    RR=0
     for query in qrels_dict:
         # print(query)  对于字典  加不加.keys()得到的结果都一样
         test_result = test_dict[query]
@@ -84,12 +86,15 @@ def MRR_eval(qrels_dict,test_dict,k=100):
         for doc_id in test_result[0: length_use]:
             i += 1
             if doc_id in true_list:
-                i_retrieval_true += 1
-                P_result.append(1/i_retrieval_true)
-                # print(i_retrieval_true / i)
+                #i_retrieval_true += 1
+                P_result.append(1/i)
+
+                break
+        print(P_result)
         if P_result:
             # 如果列表非空
-            RR = np.sum(P_result) / len(true_list)
+            RR = np.sum(P_result)# / len(true_list)
+            #print(RR)
             #print('query:', query, ',RR:', RR)
             RR_result.append(RR)
         else:
@@ -103,6 +108,7 @@ def NDCG_eval(qrels_dict, test_dict, k = 100):
     NDCG_result = []
     for query in qrels_dict:
         test_result = test_dict[query]
+
         # calculate DCG just need to know the gains of groundtruth
         # that is [2,2,2,1,1,1]
         true_list = list(qrels_dict[query].values())
@@ -118,10 +124,11 @@ def NDCG_eval(qrels_dict, test_dict, k = 100):
         for doc_id in test_result[0: length_use]:
             i += 1
             rel = qrels_dict[query].get(doc_id, 0)
+            #print(rel)
             DCG += (pow(2, rel) - 1) / math.log(i, 2)
             IDCG += (pow(2, true_list[i - 2]) - 1) / math.log(i, 2)
         NDCG = DCG / IDCG
-        #print('query', query, ', NDCG: ', NDCG)
+        #print('query', query, ', NDCG: ', NDCG,'\n')
         NDCG_result.append(NDCG)
     return np.mean(NDCG_result)
 
