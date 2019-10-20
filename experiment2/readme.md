@@ -366,6 +366,10 @@ Completeness: 0.408
 
 相比较而言，使用minibatch kmeans做聚类比传统的kmeans效果要好。
 
+##### (2.2) AffinityPropagation for text
+
+##### (2.3) Mean-shift for text
+
 ##### (2.4) SpectralCoclustering for text
 
 Normalized Mutual Information:0.416
@@ -374,6 +378,13 @@ Homogeneity: 0.328
 
 Completeness: 0.528
 
+##### (2.5) Ward for text
+
+##### (2.6) Agglomerative for text
+
+##### (2.7) DBSCAN for text
+
+##### (2.8) Guass for text
 
 ### 四、实验分析与总结
 
