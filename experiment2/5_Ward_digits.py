@@ -1,34 +1,11 @@
-"""
-=============================================================================
-Various Agglomerative Clustering on a 2D embedding of digits
-=============================================================================
 
-An illustration of various linkage option for agglomerative clustering on
-a 2D embedding of the digits dataset.
-
-The goal of this example is to show intuitively how the metrics behave, and
-not to find good clusters for the digits. This is why the example works on a
-2D embedding.
-
-What this example shows us is the behavior "rich getting richer" of
-agglomerative clustering that tends to create uneven cluster sizes.
-This behavior is pronounced for the average linkage strategy,
-that ends up with a couple of singleton clusters, while in the case
-of single linkage we get a single central cluster with all other clusters
-being drawn from noise points around the fringes.
-"""
-
-# Authors: Gael Varoquaux
-# License: BSD 3 clause (C) INRIA 2014
-
-print(__doc__)
 from time import time
-
 import numpy as np
 from scipy import ndimage
 from matplotlib import pyplot as plt
-
+from sklearn import metrics
 from sklearn import manifold, datasets
+
 
 digits = datasets.load_digits(n_class=10)
 X = digits.data
@@ -77,6 +54,8 @@ def plot_clustering(X_red, labels, title=None):
 # 2D embedding of the digits dataset
 print("Computing embedding")
 X_red = manifold.SpectralEmbedding(n_components=2).fit_transform(X)
+print(X_red.shape)
+print(X_red)
 print("Done.")
 
 from sklearn.cluster import AgglomerativeClustering
@@ -86,7 +65,7 @@ for linkage in ('ward', 'average', 'complete', 'single'):
     t0 = time()
     clustering.fit(X_red)
     print("%s :\t%.2fs" % (linkage, time() - t0))
-
+    # evaluation(y,clustering.labels_)
     plot_clustering(X_red, clustering.labels_, "%s linkage" % linkage)
 
 #plt.savefig('6_Agglomerative_digits.jpg')

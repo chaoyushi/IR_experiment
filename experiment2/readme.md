@@ -3,7 +3,7 @@
 # Clustering with sklearn
 <br>
 
-![1](plot_cluster_comparison.svg)
+![1](plot_cluster_comparison.jpg)
 
 ### 一、实验要求
 
@@ -121,9 +121,258 @@ The [`DBSCAN`](https://scikit-learn.org/stable/modules/generated/sklearn.cluster
 
 度量聚类算法的性能不是简单的统计错误的数量或计算监督分类算法中的 准确率(precision)和 召回率(recall)。 特别地，任何度量指标（evaluation metric）不应该考虑到簇标签的绝对值，而是如果这个聚类方式所分离数据类似于部分真实簇分类 (ground truth set of classes _注：gorund truth指的是真实值，在这里理解为标准答案_)或者满足某些假设，在同于一个相似性度量（similarity metric）之下,使得属于同一个类内的成员比不同类的成员更加类似。
 
+设计evaluation函数如下：
+
+```python
+
+def evaluation(labels_true,labels_pred):
+    print("Normalized Mutual Information:%0.3f"%
+          metrics.normalized_mutual_info_score(labels_true,labels_pred))
+    print("Homogeneity: %0.3f" %
+          metrics.homogeneity_score(labels_true, labels_pred))
+    print("Completeness: %0.3f" %
+          metrics.completeness_score(labels_true, labels_pred))
+    print()
+```
+
+其中，分别代表了三种评测指标，NMI，homegeneity，以及completeness。传入参数分别为真实标签以及预测标签。
+
 ### 三、实验结果
 
+##### (1.1) Kmeans for digits
 
+Normalized Mutual Information:0.465
+
+Homogeneity: 0.459
+
+Completeness: 0.472
+
+![kmeans1](1_kmeans_digits.jpg)
+
+核心代码如下：
+```python
+digits = load_digits()
+data = scale(digits.data) #数据标准化
+
+# 1794 64
+n_samples, n_features = data.shape
+n_digits = len(np.unique(digits.target))
+labels = digits.target
+reduced_data = PCA(n_components=2).fit_transform(data)
+kmeans = KMeans(init='k-means++', n_clusters=n_digits, n_init=10)
+kmeans.fit(reduced_data)
+labels_pred=kmeans.fit_predict(reduced_data)
+evaluation(labels,labels_pred)
+```
+##### (1.2) AffinityPropagation for digits
+
+Normalized Mutual Information:0.618
+
+Homogeneity: 0.601
+
+Completeness: 0.636
+
+![AP](2_AP_digits.png)
+
+核心代码如下：
+```python
+digits = load_digits()
+data = scale(digits.data) #数据标准化
+n_samples, n_features = data.shape
+n_digits = len(np.unique(digits.target))
+X=data
+af = AffinityPropagation(preference=-3100).fit(X)
+cluster_centers_indices = af.cluster_centers_indices_
+labels = af.labels_
+# centroids = af.cluster_centers_
+# print(centroids)
+n_clusters_ = len(cluster_centers_indices)
+labels_true=digits.target    #样本真实标签
+evaluation(labels_true,labels)
+data_tsne = TSNE(learning_rate=100).fit_transform(data)
+colors = [['red','green','blue','grey','yellow',
+           'cyan','black','white','blue','black'][i] for i in labels]
+'''绘制聚类图'''
+plt.scatter(data_tsne[:,0],data_tsne[:,1],c=colors,s=10)
+plt.title('AP_digits')
+plt.show()
+
+```
+
+##### (1.3) Mean-shift for digits
+
+Normalized Mutual Information:0.043
+
+Homogeneity: 0.007
+
+Completeness: 0.256
+
+![meanshift](3_mean_digits.png)
+
+```python
+digits = load_digits()
+data = scale(digits.data) #数据标准化
+#data=digits.data
+n_samples, n_features = data.shape
+n_digits = len(np.unique(digits.target))
+labels_true=digits.target
+X=data
+bandwidth = estimate_bandwidth(X, quantile=0.4, n_samples=500)
+ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+ms.fit(X)
+labels = ms.labels_
+cluster_centers = ms.cluster_centers_
+print(cluster_centers.shape)
+labels_unique = np.unique(labels)
+print(labels_unique)
+n_clusters_ = len(labels_unique)
+evaluation(labels_true,labels)
+```
+
+##### (1.4) Mean-shift for digits
+
+Normalized Mutual Information:0.295
+
+Homogeneity: 0.161
+
+Completeness: 0.541
+
+![sp](4_spectral_digits.png)
+
+```python
+digits = load_digits()
+data = scale(digits.data) #数据标准化
+
+n_samples, n_features = data.shape
+n_digits = len(np.unique(digits.target))
+labels_true=digits.target
+reduced_data = PCA(n_components=2).fit_transform(data)
+# print(reduced_data.shape)
+X=reduced_data
+# X=data
+sc=SpectralClustering(n_clusters=10).fit(X)
+labels = sc.labels_
+
+evaluation(labels_true,labels)
+```
+
+
+##### (1.5) Ward for digits
+
+
+Normalized Mutual Information:0.521
+
+Homogeneity: 0.511
+
+Completeness: 0.531
+
+![ward](6_Agglomerative_digits_image/6_Agglomerative_digits_ward.png)
+
+##### (1.6) Agglomerative for digits
+
+Normalized Mutual Information:0.526
+
+Homogeneity: 0.502
+
+Completeness: 0.551
+
+![AG](6_Agglomerative_digits_image/6_Agglomerative_digits_average.png)
+
+核心代码如下：
+
+```python
+from sklearn.cluster import AgglomerativeClustering
+
+for linkage in ('ward', 'average', 'complete', 'single'):
+    clustering = AgglomerativeClustering(linkage=linkage, n_clusters=10)
+    t0 = time()
+    clustering.fit(X_red)
+    print("%s :\t%.2fs" % (linkage, time() - t0))
+    # evaluation(y,clustering.labels_)
+    plot_clustering(X_red, clustering.labels_, "%s linkage" % linkage)
+```
+
+##### (1.7) DBSCAN for digits
+
+Normalized Mutual Information:0.332
+
+Homogeneity: 0.258
+
+Completeness: 0.427
+
+![DBSCAN](DBSCAN.png)
+
+```python
+X=data
+
+X = StandardScaler().fit_transform(X)
+print(X.shape)
+X = PCA(n_components=2).fit_transform(X)
+
+# #############################################################################
+# Compute DBSCAN
+db = DBSCAN(eps=0.354, min_samples=10).fit(X)
+core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+core_samples_mask[db.core_sample_indices_] = True
+labels = db.labels_
+evaluation(labels_true,labels)
+```
+
+##### (1.8) Guass for digits
+
+Normalized Mutual Information:0.469
+
+Homogeneity: 0.462
+
+Completeness: 0.476
+
+
+![guass1](8_Guass_digits.png)
+
+```python
+digits = load_digits()
+data = scale(digits.data) #数据标准化
+n_samples, n_features = data.shape
+n_digits = len(np.unique(digits.target))
+reduced_data = PCA(n_components=2).fit_transform(data)
+# print(reduced_data.shape)
+X=reduced_data
+labels_true=digits.target
+gmm = GaussianMixture(n_components=10)
+gmm.fit(X)
+labels = gmm.predict(X)
+evaluation(labels_true,labels)
+```
+
+** 综合以上评测结果，对于第二种聚类方法相对更加适合这个digits数据集，对于有些聚类方法，在使用前对数据通过PCA进行了降维，同时，可视化显示的时候，应用了TSNE进行降维可视化。**
+
+##### (2.1) kmeans for text
+
+**ordinary kmeans**
+
+Normalized Mutual Information:0.348
+
+Homogeneity: 0.310
+
+Completeness: 0.391
+
+**Minibatch kmeans**
+
+Normalized Mutual Information:0.362
+
+Homogeneity: 0.322
+
+Completeness: 0.408
+
+相比较而言，使用minibatch kmeans做聚类比传统的kmeans效果要好。
+
+##### (2.4) SpectralCoclustering for text
+
+Normalized Mutual Information:0.416
+
+Homogeneity: 0.328
+
+Completeness: 0.528
 
 
 ### 四、实验分析与总结
