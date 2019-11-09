@@ -3,7 +3,7 @@
 # Clustering with sklearn
 <br>
 
-![1](plot_cluster_comparison.jpg)
+![1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/plot_cluster_comparison.jpg)
 
 ### 一、实验要求
 
@@ -11,18 +11,18 @@
 
 ##### 数据集如下：
 
-![2](dataset.PNG)
+![2](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/dataset.PNG)
 
 ##### 聚类算法：
 
-![3](algorithm.PNG)
+![3](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/algorithm.PNG)
 
 
 #### 2.Evaluation
 
 ##### 聚类方法评价
 
-![4](evaluation.PNG)
+![4](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/evaluation.PNG)
 
 
 
@@ -147,7 +147,7 @@ Homogeneity: 0.459
 
 Completeness: 0.472
 
-![kmeans1](1_kmeans_digits.jpg)
+![kmeans1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/1_kmeans_digits.jpg)
 
 核心代码如下：
 ```python
@@ -207,7 +207,7 @@ Homogeneity: 0.007
 
 Completeness: 0.256
 
-![meanshift](3_mean_digits.png)
+![meanshift](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/3_mean_digits.png)
 
 ```python
 digits = load_digits()
@@ -237,7 +237,7 @@ Homogeneity: 0.161
 
 Completeness: 0.541
 
-![sp](4_spectral_digits.png)
+![sp](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/4_spectral_digits.png)
 
 ```python
 digits = load_digits()
@@ -266,7 +266,7 @@ Homogeneity: 0.511
 
 Completeness: 0.531
 
-![ward](6_Agglomerative_digits_image/6_Agglomerative_digits_ward.png)
+![ward](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/6_Agglomerative_digits_image/6_Agglomerative_digits_ward.png)
 
 ##### (1.6) Agglomerative for digits
 
@@ -276,7 +276,7 @@ Homogeneity: 0.502
 
 Completeness: 0.551
 
-![AG](6_Agglomerative_digits_image/6_Agglomerative_digits_average.png)
+![AG](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/6_Agglomerative_digits_image/6_Agglomerative_digits_average.png)
 
 核心代码如下：
 
@@ -300,7 +300,7 @@ Homogeneity: 0.258
 
 Completeness: 0.427
 
-![DBSCAN](DBSCAN.png)
+![DBSCAN](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/DBSCAN.png)
 
 ```python
 X=data
@@ -327,7 +327,7 @@ Homogeneity: 0.462
 Completeness: 0.476
 
 
-![guass1](8_Guass_digits.png)
+![guass1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/8_Guass_digits.png)
 
 ```python
 digits = load_digits()
