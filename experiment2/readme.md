@@ -172,7 +172,7 @@ Homogeneity: 0.601
 
 Completeness: 0.636
 
-![AP](2_AP_digits.png)
+![AP](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/2_AP_digits.png)
 
 核心代码如下：
 ```python
