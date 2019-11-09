@@ -3,7 +3,7 @@
 # Clustering with sklearn
 <br>
 
-![1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/plot_cluster_comparison.jpg)
+![1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment2/plot_cluster_comparison.svg)
 
 ### 一、实验要求
 
