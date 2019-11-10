@@ -346,7 +346,45 @@ evaluation(labels_true,labels)
 
 ** 综合以上评测结果，对于第二种聚类方法相对更加适合这个digits数据集，对于有些聚类方法，在使用前对数据通过PCA进行了降维，同时，可视化显示的时候，应用了TSNE进行降维可视化。**
 
+##### 2. 首先，因为数据集是文本，所以需要转化为可计算的数据，即利用tf-idf 值，首先，将文本数据向量化，然后对于一些只可以接收密集矩阵的，进行一下降维，注意，这里不能使用PCA降维，应该使用TruncatedSVD进行降维，同时，标准化。在进行聚类。
+
+##### 读取数据及向量化
+
+
+```python
+categories = [
+    'alt.atheism',
+    'talk.religion.misc',
+    'comp.graphics',
+    'sci.space',
+]
+
+dataset = fetch_20newsgroups(subset='all', categories=categories,
+                             shuffle=True, random_state=42)
+print("%d documents" % len(dataset.data))
+print("%d categories" % len(dataset.target_names))
+print()
+labels = dataset.target
+true_k = np.unique(labels).shape[0]
+
+vectorizer = TfidfVectorizer(max_df=0.5, max_features=10000,
+                                 min_df=2, stop_words='english',
+                                 use_idf=True)
+X = vectorizer.fit_transform(dataset.data)
+
+```
+
 ##### (2.1) kmeans for text
+
+```python
+def kmeans():
+    km = MiniBatchKMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1,
+                    verbose=False)
+    km.fit(X)
+    labels_true=km.labels_
+    evaluation(labels,labels_true)
+
+```
 
 **ordinary kmeans**
 
@@ -368,9 +406,62 @@ Completeness: 0.408
 
 ##### (2.2) AffinityPropagation for text
 
+```python
+print("method: AP")
+svd = TruncatedSVD(10)
+normalizer = Normalizer(copy=False)
+lsa = make_pipeline(svd, normalizer)
+
+AP_X = lsa.fit_transform(X)
+AP=AffinityPropagation().fit(AP_X)
+labels_pred2 = AP.fit_predict(AP_X)
+evaluation(labels,labels_pred2)
+
+```
+
+Normalized Mutual Information:0.419
+
+Homogeneity: 0.738
+
+Completeness: 0.238
+
+
 ##### (2.3) Mean-shift for text
 
+
+```python
+print("method: Mean shift")
+svd = TruncatedSVD(4)
+normalizer = Normalizer(copy=False)
+lsa = make_pipeline(svd, normalizer)
+
+MS_X = lsa.fit_transform(X)
+ms=MeanShift()
+labels_pred3=ms.fit_predict(MS_X)
+evaluation(labels, labels_pred3)
+```
+
+Normalized Mutual Information:0.000
+
+Homogeneity: 0.000
+
+Completeness: 1.000
+
+
 ##### (2.4) SpectralCoclustering for text
+
+```python
+print("method: Spectral clustering")
+cocluster = SpectralCoclustering(n_clusters=20,
+                                 svd_method='arpack', random_state=0)
+
+print("Coclustering...")
+start_time = time()
+cocluster.fit(X)
+y_cocluster = cocluster.row_labels_
+evaluation(labels, y_cocluster)
+
+```
 
 Normalized Mutual Information:0.416
 
@@ -380,11 +471,75 @@ Completeness: 0.528
 
 ##### (2.5) Ward for text
 
+```python
+print("method: Ward")
+ward=AgglomerativeClustering(n_clusters=20)
+WA_X = lsa.fit_transform(X)
+labels_pred5=ward.fit_predict(WA_X)
+evaluation(labels_true,labels_pred5)
+```
+
+Normalized Mutual Information:0.442
+
+Homogeneity: 0.723
+
+Completeness: 0.270
+
+
+
 ##### (2.6) Agglomerative for text
+
+```python
+print("method: Agglomerative")
+ac=AgglomerativeClustering(n_clusters=20,linkage ='average')
+labels_pred6=ac.fit_predict(WA_X)
+evaluation(labels_true, labels_pred6)
+
+```
+
+
+Normalized Mutual Information:0.465
+
+Homogeneity: 0.672
+
+Completeness: 0.322
+
 
 ##### (2.7) DBSCAN for text
 
+```python
+DB=DBSCAN()
+
+labels_pred7=DB.fit_predict(X)
+evaluation(labels_true, labels_pred7)
+
+```
+
+Normalized Mutual Information:0.008
+
+Homogeneity: 0.001
+
+Completeness: 0.077
+
 ##### (2.8) Guass for text
+
+
+```python
+
+
+GU_X = lsa.fit_transform(X)
+labels_pred8=Guass.fit_predict(GU_X)
+evaluation(labels_true, labels_pred8)
+Guass=GaussianMixture(n_components=20)
+
+```
+
+Normalized Mutual Information:0.407
+
+Homogeneity: 0.664
+
+Completeness: 0.250
+
 
 ### 四、实验分析与总结
 
