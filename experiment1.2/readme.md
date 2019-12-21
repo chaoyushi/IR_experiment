@@ -108,7 +108,6 @@ def get_postings():
 
 #### 2.Use SMART notation: lnc.ltc
 
-
 **参考计算方式如下图：**
 
 ![image1](smartnotation.PNG)

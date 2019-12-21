@@ -11,7 +11,7 @@
 
 我们首先观察该数据集，如下：
 
-![image1](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/1.PNG)
+![image1](1.PNG)
 
 &emsp;我们可以看到，tweets数据集中包含了许多信息，包括username，clusterNo，text，timestr,tweetid，errorcode，textcleaned，relevance。其中，我们需要提取的信息是text部分。
 
@@ -54,7 +54,6 @@ topics进行测试；
 &emsp;(1) 首先，逐行读取tweet文件，遍历每一行，并将每一行的每一个词汇存入一个集合中，即实现集合中词汇的去重；遍历集合中的每一个term，如果该term在全局字典中存在对应的keys，则对以该terms为keys的元组存在时，那么append该term存在的行号，(此处以行号作为每一个term的标识)，如果不存在，则创建对应的元组。
 
 &emsp;(2)记录文本对应的行数。并输出提示信息。
-
 
 **注意**：postings词典 是在全局声明的。
 
@@ -243,23 +242,23 @@ elif '(' not in split_list and ')' not in split_list:
 
 #### 1.单词项测试
 
-![image2](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test1.PNG)
+![image2](test1.PNG)
 
 #### 2.两个词项执行and操作
 
-![image3](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test2.PNG)
+![image3](test2.PNG)
 
 #### 3.两个词项执行or操作
 
-![image4](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test3.PNG)
+![image4](test3.PNG)
 
 #### 4.两个词项执行not操作(and not)
 
-![image5](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test4.PNG)
+![image5](test4.PNG)
 
 #### 5.多个词项执行and，or，not操作
 
-![image6](https://github.com/Eternal-Sun625/IR_experiment/blob/master/experiment1/test5.PNG)
+![image6](test5.PNG)
 
 ### 四、实验改进与不足
 
